@@ -1,0 +1,44 @@
+version: '3'
+services:
+  web:
+    image: ocsinventory/ocsinventory-docker-image:2.6
+    container_name: web
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Madrid
+      OCS_DBNAME: ocsweb
+      OCS_DBSERVER_READ: db
+      OCS_DBSERVER_WRITE: db
+      OCS_DBUSER: ocs
+      OCS_DBPASS: 0cSP@ssw0rd
+    volumes:
+      - /usr/share/ocsinventory-reports/ocsreports/download/:/usr/share/ocsinventory-reports/ocsreports/download/
+      - /etc/ocsinventory-reports/:/etc/ocsinventory-reports/
+      - /var/lib/ocsinventory-reports/:/var/lib/ocsinventory-reports/
+      - /var/log/ocsinventory-server/:/var/log/ocsinventory-server/
+      - /var/www/html/index.html:/var/www/html/index.html
+    networks:
+      - db-backend
+    ports:
+      - 80:80
+      - 443:443
+  
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Madrid
+      MYSQL_ROOT_PASSWORD: P@ssw0rd
+      MYSQL_USER: ocs
+      MYSQL_PASSWORD: 0cSP@ssw0rd
+      MYSQL_database: ocsweb
+    volumes: 
+      - $PWD/sql/:/docker-entrypoint-initdb.d/
+      - /var/lib/mysql:/var/lib/mysql
+    networks:
+      - db-backend
+    ports:
+      - 3306:3306
+networks:
+  db-backend:
